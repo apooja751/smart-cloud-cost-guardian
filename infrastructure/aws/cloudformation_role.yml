@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Smart Cloud Cost Guardian (SCCG) - Least-Privilege Read-Only Cross-Account FinOps Role'
+
+Parameters:
+  SCCGAccountID:
+    Type: String
+    Description: 'The AWS Account ID of the Smart Cloud Cost Guardian SaaS platform'
+    Default: '123456789012'
+  ExternalID:
+    Type: String
+    Description: 'Unique External ID generated from your SCCG workspace for secure handshake'
+    Default: 'sccg-audit-secure-handshake'
+
+Resources:
+  SmartCloudCostGuardianRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'SmartCloudCostGuardianRole'
+      Description: 'Allows Smart Cloud Cost Guardian to inspect metrics and cost data without destructive write permissions.'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${SCCGAccountID}:root'
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref ExternalID
+      Policies:
+        - PolicyName: 'SCCGReadOnlyFinOpsPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeVolumes'
+                  - 'ec2:DescribeSnapshots'
+                  - 'ec2:DescribeAddresses'
+                  - 'ec2:DescribeRegions'
+                  - 'rds:DescribeDBInstances'
+                  - 'rds:DescribeDBClusters'
+                  - 's3:ListAllMyBuckets'
+                  - 's3:GetBucketLocation'
+                  - 'elasticloadbalancing:DescribeLoadBalancers'
+                  - 'lambda:ListFunctions'
+                  - 'cloudwatch:GetMetricData'
+                  - 'cloudwatch:GetMetricStatistics'
+                  - 'ce:GetCostAndUsage'
+                  - 'ce:GetCostForecast'
+                  - 'sts:GetCallerIdentity'
+                Resource: '*'
+
+Outputs:
+  RoleARN:
+    Description: 'The ARN of the IAM Role to input into SCCG AWS Accounts integration screen'
+    Value: !GetAtt SmartCloudCostGuardianRole.Arn
