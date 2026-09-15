@@ -22,7 +22,9 @@ def get_cost_summary(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    acc_query = db.query(AWSAccount).filter(AWSAccount.user_id == current_user.id)
+    acc_query = db.query(AWSAccount)
+    if current_user.role != 'ADMIN':
+        acc_query = acc_query.filter(AWSAccount.user_id == current_user.id)
     if account_id:
         acc_query = acc_query.filter(AWSAccount.id == account_id)
     account = acc_query.first()
@@ -92,7 +94,9 @@ def get_daily_costs(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    acc = db.query(AWSAccount).filter(AWSAccount.user_id == current_user.id)
+    acc = db.query(AWSAccount)
+    if current_user.role != 'ADMIN':
+        acc = acc.filter(AWSAccount.user_id == current_user.id)
     if account_id:
         acc = acc.filter(AWSAccount.id == account_id)
     account = acc.first()
@@ -118,7 +122,9 @@ def get_service_costs(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    acc = db.query(AWSAccount).filter(AWSAccount.user_id == current_user.id)
+    acc = db.query(AWSAccount)
+    if current_user.role != 'ADMIN':
+        acc = acc.filter(AWSAccount.user_id == current_user.id)
     if account_id:
         acc = acc.filter(AWSAccount.id == account_id)
     account = acc.first()

@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = '/api/v1'
 
     # Database
-    DATABASE_URL: str = 'sqlite:///./sccg.db'
+    DATABASE_URL: str = Field(
+        default_factory=lambda: f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'sccg.db')).replace(chr(92), '/')}"
+    )
 
     # Security
     JWT_SECRET: str = 'super-secret-sccg-guardian-jwt-key-2026-production-finops'

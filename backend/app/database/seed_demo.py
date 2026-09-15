@@ -2,6 +2,7 @@ import json
 import random
 import datetime
 from datetime import timezone
+from typing import Dict, Any
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.models.aws_account import AWSAccount
@@ -17,32 +18,48 @@ from app.core.security import get_password_hash
 from app.core.logging import logger
 
 def seed_demo_data(db: Session) -> Dict[str, Any]:
-    # 1. Check or create default admin/user
-    admin = db.query(User).filter(User.email == 'admin@guardian.io').first()
-    if not admin:
-        admin = User(
-            name='Cloud FinOps Admin',
-            email='admin@guardian.io',
-            password_hash=get_password_hash('Admin@123456'),
-            role='ADMIN',
-            is_active=True
-        )
-        db.add(admin)
-        db.commit()
-        db.refresh(admin)
-
-    demo_user = db.query(User).filter(User.email == 'demo@guardian.io').first()
+    # 1. Check or create primary demo/admin users (matches frontend quick test buttons & README)
+    demo_user = db.query(User).filter(User.email == 'demo@sccg.io').first()
     if not demo_user:
         demo_user = User(
             name='FinOps Lead Engineer',
-            email='demo@guardian.io',
-            password_hash=get_password_hash('Demo@123456'),
+            email='demo@sccg.io',
+            password_hash=get_password_hash('Demo123!Secure'),
             role='USER',
             is_active=True
         )
         db.add(demo_user)
         db.commit()
         db.refresh(demo_user)
+    else:
+        demo_user.password_hash = get_password_hash('Demo123!Secure')
+        db.commit()
+
+    admin = db.query(User).filter(User.email == 'admin@sccg.io').first()
+    if not admin:
+        admin = User(
+            name='Cloud FinOps Admin',
+            email='admin@sccg.io',
+            password_hash=get_password_hash('Admin123!Secure'),
+            role='ADMIN',
+            is_active=True
+        )
+        db.add(admin)
+        db.commit()
+        db.refresh(admin)
+    else:
+        admin.password_hash = get_password_hash('Admin123!Secure')
+        db.commit()
+
+    # Legacy fallback accounts
+    for leg_email, leg_pwd, leg_name, leg_role in [
+        ('demo@guardian.io', 'Demo@123456', 'FinOps Lead Engineer', 'USER'),
+        ('admin@guardian.io', 'Admin@123456', 'Cloud FinOps Admin', 'ADMIN')
+    ]:
+        u = db.query(User).filter(User.email == leg_email).first()
+        if not u:
+            db.add(User(name=leg_name, email=leg_email, password_hash=get_password_hash(leg_pwd), role=leg_role, is_active=True))
+    db.commit()
 
     target_user = demo_user
 

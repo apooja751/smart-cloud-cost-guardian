@@ -93,7 +93,10 @@ def connect_account(
 
 @router.get('/accounts', response_model=StandardResponse[List[AWSAccountResponse]])
 def list_accounts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    accounts = db.query(AWSAccount).filter(AWSAccount.user_id == current_user.id).all()
+    if current_user.role == 'ADMIN':
+        accounts = db.query(AWSAccount).all()
+    else:
+        accounts = db.query(AWSAccount).filter(AWSAccount.user_id == current_user.id).all()
     results = []
     for acc in accounts:
         item = AWSAccountResponse.model_validate(acc)
@@ -103,7 +106,10 @@ def list_accounts(db: Session = Depends(get_db), current_user: User = Depends(ge
 
 @router.get('/accounts/{id}', response_model=StandardResponse[AWSAccountResponse])
 def get_account(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    acc = db.query(AWSAccount).filter(AWSAccount.id == id, AWSAccount.user_id == current_user.id).first()
+    query = db.query(AWSAccount).filter(AWSAccount.id == id)
+    if current_user.role != 'ADMIN':
+        query = query.filter(AWSAccount.user_id == current_user.id)
+    acc = query.first()
     if not acc:
         raise HTTPException(status_code=404, detail='AWS account not found')
     resp = AWSAccountResponse.model_validate(acc)
@@ -112,7 +118,10 @@ def get_account(id: int, db: Session = Depends(get_db), current_user: User = Dep
 
 @router.delete('/accounts/{id}', response_model=StandardResponse[dict])
 def disconnect_account(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    acc = db.query(AWSAccount).filter(AWSAccount.id == id, AWSAccount.user_id == current_user.id).first()
+    query = db.query(AWSAccount).filter(AWSAccount.id == id)
+    if current_user.role != 'ADMIN':
+        query = query.filter(AWSAccount.user_id == current_user.id)
+    acc = query.first()
     if not acc:
         raise HTTPException(status_code=404, detail='AWS account not found')
     

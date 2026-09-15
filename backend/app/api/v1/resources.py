@@ -25,7 +25,9 @@ def list_resources(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Resource).join(AWSAccount).filter(AWSAccount.user_id == current_user.id)
+    query = db.query(Resource).join(AWSAccount)
+    if current_user.role != 'ADMIN':
+        query = query.filter(AWSAccount.user_id == current_user.id)
 
     if account_id:
         query = query.filter(Resource.aws_account_id == account_id)
@@ -75,7 +77,9 @@ def get_resource_summary(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Resource).join(AWSAccount).filter(AWSAccount.user_id == current_user.id)
+    query = db.query(Resource).join(AWSAccount)
+    if current_user.role != 'ADMIN':
+        query = query.filter(AWSAccount.user_id == current_user.id)
     if account_id:
         query = query.filter(Resource.aws_account_id == account_id)
     
@@ -101,7 +105,10 @@ def get_resource_summary(
 
 @router.get('/{id}', response_model=StandardResponse[ResourceDetailResponse])
 def get_resource_detail(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    r = db.query(Resource).join(AWSAccount).filter(Resource.id == id, AWSAccount.user_id == current_user.id).first()
+    query = db.query(Resource).join(AWSAccount).filter(Resource.id == id)
+    if current_user.role != 'ADMIN':
+        query = query.filter(AWSAccount.user_id == current_user.id)
+    r = query.first()
     if not r:
         raise HTTPException(status_code=404, detail='Resource not found')
     
