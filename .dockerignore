@@ -1,0 +1,49 @@
+# Git and CI/CD
+.git/
+.github/
+.gitignore
+
+# Python artifacts & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node & Frontend dependencies and build output
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+**/vite/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+sccg.db
+test_sccg.db
+
+# Environment variables & secrets
+.env
+.env.*
+!*.example
+*.pem
+*.key
+*.cert
+
+# Reports storage runtime files
+backend/reports_storage/*
+!backend/reports_storage/.gitkeep
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

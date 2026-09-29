@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: sccg-backend-prod
+    restart: always
+    environment:
+      - APP_NAME=Smart Cloud Cost Guardian
+      - APP_ENV=production
+      - DEBUG=false
+      - DEMO_MODE=${DEMO_MODE:-false}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./sccg_production.db}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - CORS_ORIGINS=["https://sccg.yourdomain.com", "http://localhost"]
+    volumes:
+      - sccg-prod-data:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sccg-network
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    container_name: sccg-frontend-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - sccg-network
+
+volumes:
+  sccg-prod-data:
+    driver: local
+
+networks:
+  sccg-network:
+    driver: bridge

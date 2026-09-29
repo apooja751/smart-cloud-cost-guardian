@@ -47,19 +47,20 @@ export const DashboardPage: React.FC = () => {
       setLoading(true);
       try {
         const accParam = activeAccount ? `?account_id=${activeAccount.id}` : '';
-        const [sumRes, dailyRes, svcRes, recsRes, healthRes] = await Promise.all([
+        const dailyUrl = activeAccount ? `/costs/daily?account_id=${activeAccount.id}&days=30` : '/costs/daily?days=30';
+        const [sumRes, dailyRes, svcRes, recsRes, healthRes] = await Promise.allSettled([
           api.get(`/costs/summary${accParam}`),
-          api.get(`/costs/daily${accParam}&days=30`),
+          api.get(dailyUrl),
           api.get(`/costs/services${accParam}`),
           api.get(`/recommendations${accParam}`),
           api.get(`/health-score${accParam}`)
         ]);
 
-        if (sumRes.data.success) setSummary(sumRes.data.data);
-        if (dailyRes.data.success) setDailyCosts(dailyRes.data.data);
-        if (svcRes.data.success) setServiceCosts(svcRes.data.data);
-        if (recsRes.data.success) setRecs(recsRes.data.data.slice(0, 4));
-        if (healthRes.data.success) setHealth(healthRes.data.data);
+        if (sumRes.status === 'fulfilled' && sumRes.value.data.success) setSummary(sumRes.value.data.data);
+        if (dailyRes.status === 'fulfilled' && dailyRes.value.data.success) setDailyCosts(dailyRes.value.data.data);
+        if (svcRes.status === 'fulfilled' && svcRes.value.data.success) setServiceCosts(svcRes.value.data.data);
+        if (recsRes.status === 'fulfilled' && recsRes.value.data.success) setRecs(recsRes.value.data.data.slice(0, 4));
+        if (healthRes.status === 'fulfilled' && healthRes.value.data.success) setHealth(healthRes.value.data.data);
       } catch (err) {
         console.error('Failed to load dashboard', err);
       } finally {

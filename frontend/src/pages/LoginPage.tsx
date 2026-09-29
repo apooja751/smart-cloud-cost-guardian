@@ -26,6 +26,7 @@ export const LoginPage: React.FC = () => {
   };
 
   const handleDemoFill = (role: 'user' | 'admin') => {
+    setError(null);
     if (role === 'admin') {
       setEmail('admin@sccg.io');
       setPassword('Admin123!Secure');
@@ -111,17 +112,17 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleDemoFill('user')}
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-sky-400 flex items-center justify-center gap-1.5 transition"
+              className="px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-sky-500 text-xs font-semibold text-sky-400 flex items-center justify-center gap-1.5 transition cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+              <Sparkles className="w-4 h-4 text-sky-400" />
               <span>Demo User</span>
             </button>
             <button
               type="button"
               onClick={() => handleDemoFill('admin')}
-              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-indigo-400 flex items-center justify-center gap-1.5 transition"
+              className="px-3 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-indigo-500 text-xs font-semibold text-indigo-400 flex items-center justify-center gap-1.5 transition cursor-pointer"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+              <ShieldCheck className="w-4 h-4 text-indigo-400" />
               <span>Admin User</span>
             </button>
           </div>
